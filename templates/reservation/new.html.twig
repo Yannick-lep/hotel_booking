@@ -1,0 +1,109 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle réservation - {{ service.name }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Style pour les boutons radio de durée */
+        .duration-choice {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: white;
+        }
+
+        .duration-choice:hover {
+            border-color: #007bff;
+            background-color: #f8f9fa;
+        }
+
+        .duration-choice input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .duration-choice input[type="radio"]:checked + label {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        /* Info box */
+        .reservation-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .reservation-info h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.5rem;
+        }
+
+        .reservation-info p {
+            margin: 5px 0;
+            font-size: 1.1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    {# INFORMATIONS DE LA RÉSERVATION #}
+    <div class="reservation-info">
+        <h2> Nouvelle réservation</h2>
+        <p><strong>Service :</strong> {{ service.name }}</p>
+        <p><strong>Date :</strong> {{ startAt.format('d/m/Y') }}</p>
+        <p><strong>Heure de début :</strong> {{ startAt.format('H:i') }}</p>
+    </div>
+
+    {# FORMULAIRE #}
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Choisissez la durée</h3>
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+                
+                {# Affichage des durées disponibles #}
+                <div class="mb-3">
+                    {% for child in form.endAt %}
+                        <div class="form-check duration-choice">
+                            {{ form_widget(child) }}
+                            {{ form_label(child) }}
+                        </div>
+                    {% endfor %}
+                    {{ form_errors(form.endAt) }}
+                </div>
+
+                {# Informations complémentaires #}
+                <div class="alert alert-info">
+                    <strong> Bon à savoir :</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Vous pouvez modifier ou annuler votre réservation à tout moment</li>
+                        <li>La durée maximale d'une réservation est de 4 heures</li>
+                    </ul>
+                </div>
+
+                {# Boutons #}
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                         Confirmer la réservation
+                    </button>
+                    <a href="{{ path('calendar_show', {
+                        serviceSlug: service.slug,
+                        date: startAt.format('Y-m-d')
+                    }) }}" class="btn btn-secondary btn-lg">
+                        Annuler
+                    </a>
+                </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}
