@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Inscription{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">Créer un compte</h2>
+            </div>
+            <div class="card-body">
+            
+                {{ form_start(registrationForm) }}
+                    
+                    {# Affiche le champ email avec son label et ses erreurs #}
+                    <div class="mb-3">
+                        {{ form_label(registrationForm.email) }}
+                        {{ form_widget(registrationForm.email) }}
+                        {{ form_errors(registrationForm.email) }}
+                    </div>
+
+                    {# Affiche le champ mot de passe #}
+                    <div class="mb-3">
+                        {{ form_label(registrationForm.plainPassword.first) }}
+                        {{ form_widget(registrationForm.plainPassword.first) }}
+                        {{ form_errors(registrationForm.plainPassword.first) }}
+                    </div>
+
+                    {# Affiche le champ confirmation mot de passe #}
+                    <div class="mb-3">
+                        {{ form_label(registrationForm.plainPassword.second) }}
+                        {{ form_widget(registrationForm.plainPassword.second) }}
+                        {{ form_errors(registrationForm.plainPassword.second) }}
+                    </div>
+
+                    {# Affiche la checkbox CGU #}
+                    <div class="mb-3 form-check">
+                        {{ form_widget(registrationForm.agreeTerms) }}
+                        {{ form_label(registrationForm.agreeTerms) }}
+                        {{ form_errors(registrationForm.agreeTerms) }}
+                    </div>
+
+                    {# Bouton de soumission #}
+                    <button type="submit" class="btn btn-primary w-100">
+                        S'inscrire
+                    </button>
+                
+                {{ form_end(registrationForm) }}
+                
+                <hr>
+                
+                {# Lien vers la page de connexion #}
+                <p class="text-center mb-0">
+                    Déjà un compte ? 
+                    <a href="{{ path('app_login') }}">Connectez-vous ici</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
