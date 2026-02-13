@@ -1,5 +1,4 @@
 <?php
-// src/Repository/ReservationRepository.php
 
 namespace App\Repository;
 
@@ -44,12 +43,6 @@ class ReservationRepository extends ServiceEntityRepository
             ->andWhere('r.service = :service')
             ->setParameter('service', $service)
             
-            // Logique de détection de chevauchement :
-            // Deux réservations se chevauchent si :
-            // - La nouvelle commence avant que l'existante se termine
-            // - ET la nouvelle se termine après que l'existante ait commencé
-            // 
-            // Formule : (newStart < existingEnd) AND (newEnd > existingStart)
             ->andWhere('r.startAt < :endAt')
             ->setParameter('endAt', $endAt)
             ->andWhere('r.endAt > :startAt')
