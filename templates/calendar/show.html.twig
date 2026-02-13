@@ -1,0 +1,229 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Calendrier - {{ calendar.service.name }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* STYLE PERSONNALISÉ DU CALENDRIER */
+        
+        /* Grille des créneaux horaires */
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Style de base d'un créneau */
+        .time-slot {
+            padding: 15px 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+
+        /* Créneau DISPONIBLE (cliquable) */
+        .time-slot.available {
+            background-color: #d4edda;
+            border-color: #28a745;
+            cursor: pointer;
+        }
+
+        .time-slot.available:hover {
+            background-color: #28a745;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* Créneau RÉSERVÉ (non cliquable) */
+        .time-slot.unavailable {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        /* Créneau PASSÉ (dans le passé) */
+        .time-slot.past {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+            color: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        /* En-tête du calendrier */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            color: white;
+        }
+
+        .calendar-header h1 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        /* Navigation entre les jours */
+        .date-navigation {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .date-navigation .current-date {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+
+        /* Légende du calendrier */
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            border: 2px solid;
+        }
+
+        .legend-box.available {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+
+        .legend-box.unavailable {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .legend-box.past {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    {# EN-TÊTE DU CALENDRIER #}
+    <div class="calendar-header">
+        <div>
+            <h1>📅 {{ calendar.service.name }}</h1>
+            <p class="mb-0">{{ calendar.service.description }}</p>
+        </div>
+    </div>
+
+    {# NAVIGATION ENTRE LES JOURS #}
+    <div class="date-navigation">
+        {# Bouton JOUR PRÉCÉDENT #}
+        <a href="{{ path('calendar_show', {
+            serviceSlug: calendar.service.slug,
+            date: calendar.previousDay.format('Y-m-d')
+        }) }}" class="btn btn-outline-secondary">
+            ← Jour précédent
+        </a>
+
+        {# DATE ACTUELLE #}
+        <div class="current-date">
+            {{ calendar.date.format('d/m/Y') }}
+            {% if calendar.isToday %}
+                <span class="badge bg-success">Aujourd'hui</span>
+            {% endif %}
+        </div>
+
+        {# Bouton JOUR SUIVANT #}
+        <a href="{{ path('calendar_show', {
+            serviceSlug: calendar.service.slug,
+            date: calendar.nextDay.format('Y-m-d')
+        }) }}" class="btn btn-outline-secondary">
+            Jour suivant →
+        </a>
+    </div>
+
+    {# MESSAGE SI JOUR FERMÉ #}
+    {% if closedMessage %}
+        <div class="alert alert-warning mt-4">
+            <strong>⚠️ Fermé</strong><br>
+            {{ closedMessage }}
+        </div>
+    {% endif %}
+
+    {# LÉGENDE #}
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-box available"></div>
+            <span>Disponible</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-box unavailable"></div>
+            <span>Réservé</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-box past"></div>
+            <span>Passé</span>
+        </div>
+    </div>
+
+    {# GRILLE DES CRÉNEAUX HORAIRES #}
+    {% if not closedMessage %}
+        <div class="time-slots">
+            {% for slot in calendar.slots %}
+                {% if slot.available %}
+                    {# CRÉNEAU DISPONIBLE - CLIQUABLE #}
+                    <a href="{{ path('reservation_new', {
+                        serviceSlug: calendar.service.slug,
+                        startTime: slot.datetime.format('Y-m-d H:i')
+                    }) }}" class="time-slot available">
+                        {{ slot.time }}
+                    </a>
+                {% elseif slot.isPast %}
+                    {# CRÉNEAU PASSÉ - NON CLIQUABLE #}
+                    <div class="time-slot past">
+                        {{ slot.time }}
+                    </div>
+                {% else %}
+                    {# CRÉNEAU RÉSERVÉ - NON CLIQUABLE #}
+                    <div class="time-slot unavailable">
+                        {{ slot.time }}
+                        <br><small>Réservé</small>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {# BOUTON RETOUR #}
+    <div class="mt-4">
+        <a href="{{ path('home') }}" class="btn btn-secondary">
+            ← Retour à l'accueil
+        </a>
+    </div>
+</div>
+{% endblock %}
