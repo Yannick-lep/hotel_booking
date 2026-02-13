@@ -1,20 +1,70 @@
+{# templates/home/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% block title %}Accueil - Réservation de services{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="container">
+    {# HERO SECTION #}
+    <div class="text-center my-5">
+        <h1 class="display-4"> Bienvenue dans notre espace bien-être</h1>
+        <p class="lead">Réservez vos créneaux pour profiter de nos services premium</p>
+    </div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
+    {# MESSAGE SI UTILISATEUR CONNECTÉ #}
+    {% if app.user %}
+        <div class="alert alert-info">
+            <strong> 😁Bonjour {{ app.user.email }} !</strong><br>
+            Vous pouvez maintenant réserver vos créneaux. 
+            <a href="{{ path('reservation_list') }}" class="alert-link">Voir mes réservations</a>
+        </div>
+    {% else %}
+        <div class="alert alert-warning">
+            <strong>ℹ Information</strong><br>
+            Vous pouvez consulter les disponibilités, mais vous devez 
+            <a href="{{ path('app_login') }}" class="alert-link">vous connecter</a> pour réserver.
+        </div>
+    {% endif %}
 
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>C:/Users/yanni/Desktop/symfony_project/hotel_booking/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>C:/Users/yanni/Desktop/symfony_project/hotel_booking/templates/home/index.html.twig</code></li>
-    </ul>
+    {# LISTE DES SERVICES #}
+    <h2 class="mb-4">Nos services</h2>
+    
+    <div class="row">
+        {% for service in services %}
+            <div class="col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h3 class="card-title">{{ service.name }}</h3>
+                        <p class="card-text">{{ service.description }}</p>
+                        
+                        <div class="d-grid gap-2">
+                            {# Bouton vers le calendrier #}
+                            <a href="{{ path('calendar_today', {serviceSlug: service.slug}) }}" 
+                               class="btn btn-primary">
+                                 Voir les disponibilités
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    Aucun service disponible pour le moment.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {# INFORMATIONS PRATIQUES #}
+    <div class="mt-5 p-4 bg-light rounded">
+        <h3> Informations pratiques</h3>
+        <ul>
+            <li><strong>Horaires :</strong> Du lundi au samedi, de 8h à 19h</li>
+            <li><strong>Durée :</strong> Réservations de 30 minutes à 4 heures</li>
+            <li><strong>Créneaux :</strong> Par tranches de 30 minutes</li>
+            <li><strong>Annulation :</strong> Possible à tout moment depuis vos réservations</li>
+        </ul>
+    </div>
 </div>
 {% endblock %}
