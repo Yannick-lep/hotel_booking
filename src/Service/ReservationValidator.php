@@ -1,5 +1,4 @@
 <?php
-// src/Service/ReservationValidator.php
 
 namespace App\Service;
 
