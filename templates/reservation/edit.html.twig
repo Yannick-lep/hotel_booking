@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier la réservation{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .duration-choice {
+            padding: 15px 20px;
+            margin-bottom: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: white;
+        }
+
+        .duration-choice:hover {
+            border-color: #ffc107;
+            background-color: #fff8e1;
+        }
+
+        .current-reservation {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    {# RÉSERVATION ACTUELLE #}
+    <div class="current-reservation">
+        <h2> Modifier votre réservation</h2>
+        <p><strong>Service :</strong> {{ reservation.service.name }}</p>
+        <p><strong>Date :</strong> {{ reservation.startAt.format('d/m/Y') }}</p>
+        <p><strong>Heure de début :</strong> {{ reservation.startAt.format('H:i') }}</p>
+        <p class="mb-0">
+            <strong>Durée actuelle :</strong> 
+            {{ reservation.durationInMinutes }} minutes 
+            (jusqu'à {{ reservation.endAt.format('H:i') }})
+        </p>
+    </div>
+
+    {# FORMULAIRE DE MODIFICATION #}
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h3 class="mb-0">Choisir une nouvelle durée</h3>
+        </div>
+        <div class="card-body">
+            {{ form_start(form) }}
+                
+                <div class="mb-3">
+                    {% for child in form.endAt %}
+                        <div class="form-check duration-choice">
+                            {{ form_widget(child) }}
+                            {{ form_label(child) }}
+                        </div>
+                    {% endfor %}
+                    {{ form_errors(form.endAt) }}
+                </div>
+
+                <div class="alert alert-warning">
+                    <strong> Attention :</strong>
+                    La modification de la durée est soumise aux disponibilités.
+                    Si un autre créneau a été réservé depuis, certaines durées peuvent ne plus être disponibles.
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-warning btn-lg">
+                         Enregistrer les modifications
+                    </button>
+                    <a href="{{ path('reservation_list') }}" class="btn btn-secondary btn-lg">
+                        Annuler
+                    </a>
+                </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+{% endblock %}

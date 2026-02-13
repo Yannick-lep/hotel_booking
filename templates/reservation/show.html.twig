@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la réservation{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-info text-white">
+                    <h2 class="mb-0"> Détails de votre réservation</h2>
+                </div>
+                <div class="card-body">
+                    {# SERVICE #}
+                    <div class="mb-4">
+                        <h4 class="text-primary">{{ reservation.service.name }}</h4>
+                        <p class="text-muted">{{ reservation.service.description }}</p>
+                    </div>
+
+                    <hr>
+
+                    {# INFORMATIONS TEMPORELLES #}
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong> Date :</strong><br>
+                            <span class="fs-5">{{ reservation.startAt.format('d/m/Y') }}</span>
+                        </div>
+                        <div class="col-md-6">
+                            <strong> Horaires :</strong><br>
+                            <span class="fs-5">
+                                {{ reservation.startAt.format('H:i') }} 
+                                → 
+                                {{ reservation.endAt.format('H:i') }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <strong> Durée totale :</strong><br>
+                        <span class="fs-5">{{ reservation.durationInMinutes }} minutes</span>
+                    </div>
+
+                    <hr>
+
+                    {# MÉTADONNÉES #}
+                    <div class="mb-4">
+                        <small class="text-muted">
+                            Réservation créée le {{ reservation.createdAt.format('d/m/Y à H:i') }}
+                        </small>
+                    </div>
+
+                    {# STATUT #}
+                    {% if reservation.startAt > date() %}
+                        <div class="alert alert-success">
+                            <strong> Réservation confirmée</strong><br>
+                            Cette réservation est à venir.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-secondary">
+                            <strong> Réservation passée</strong><br>
+                            Cette réservation a déjà eu lieu.
+                        </div>
+                    {% endif %}
+
+                    {# ACTIONS #}
+                    <div class="d-flex gap-2 mt-4">
+                        {% if reservation.startAt > date() %}
+                            <a href="{{ path('reservation_edit', {id: reservation.id}) }}" 
+                               class="btn btn-warning">
+                                 Modifier
+                            </a>
+                            
+                            <form method="post" 
+                                  action="{{ path('reservation_delete', {id: reservation.id}) }}"
+                                  onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?');"
+                                  class="d-inline">
+                                <input type="hidden" name="_token" 
+                                       value="{{ csrf_token('delete' ~ reservation.id) }}">
+                                <button type="submit" class="btn btn-danger">
+                                     Annuler la réservation
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        <a href="{{ path('reservation_list') }}" class="btn btn-secondary">
+                            ← Retour à mes réservations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
