@@ -1,43 +1,66 @@
+# config/packages/security.yaml
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    # Comment Symfony va hasher (crypter) les mots de passe
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+        # 'auto' signifie : Symfony choisit automatiquement l'algorithme le plus sécurisé
+    
+    # Où Symfony va chercher les utilisateurs (dans notre cas : en base de données)
     providers:
-        # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
                 class: App\Entity\User
                 property: email
-
+                # On identifie les utilisateurs par leur email (pas par un username)
+    
+    # Les différents "murs de sécurité" de l'application
     firewalls:
         dev:
-            # Ensure dev tools and static assets are always allowed
-            pattern: ^/(_profiler|_wdt|assets|build)/
+            # Firewall spécial pour les outils de développement (profiler, etc.)
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+            # security: false = pas de contrôle de sécurité sur ces URLs
+        
         main:
             lazy: true
+            # lazy: true = Symfony ne charge l'utilisateur que si nécessaire (optimisation)
+            
             provider: app_user_provider
+            # Indique quel provider utiliser (défini plus haut)
+            
+            # Configuration du formulaire de login
+            form_login:
+                login_path: app_login
+                # Route vers la page de connexion
+                check_path: app_login
+                # Route qui traite la soumission du formulaire
+                default_target_path: home
+                # Où rediriger après une connexion réussie
+                enable_csrf: true
+                # Protection CSRF : empêche les attaques de type "Cross-Site Request Forgery"
+            
+            # Configuration de la déconnexion
+            logout:
+                path: app_logout
+                # Route pour se déconnecter
+                target: home
+                # Où rediriger après déconnexion
 
-            # Activate different ways to authenticate:
-            # https://symfony.com/doc/current/security.html#the-firewall
-
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
-
-    # Note: Only the *first* matching rule is applied
+    # Contrôle d'accès : qui peut accéder à quoi
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # Tout le monde peut accéder aux pages de login/register
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        # Toutes les pages /reservation/* nécessitent d'être connecté
+        - { path: ^/reservation, roles: ROLE_USER }
+        - { path: ^/profile, roles: ROLE_USER }
 
 when@test:
+    # Configuration spécifique pour les tests automatisés
     security:
         password_hashers:
-            # Password hashers are resource-intensive by design to ensure security.
-            # In tests, it's safe to reduce their cost to improve performance.
             Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
                 algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+                cost: 4
+                time_cost: 3
+                memory_cost: 10
